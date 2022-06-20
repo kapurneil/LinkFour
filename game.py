@@ -1,9 +1,9 @@
 class Game:
     def __init__(self):
-        self.board = [[0 for i in range(7)] for i in range(6)]
+        self.board = [[0 for i in range(7)] for i in range(6)] #creates board with 6 rows, 7 columns
 
     def __repr__(self):
-        str_board = "" #creates string of board that will be returned
+        str_board = ""
         for row in self.board:
             str_board += "\n" #each nested list represents a row so a new line is started when a list is iterated through
             for element in row:
@@ -22,3 +22,66 @@ class Game:
                 self.board[row][int(column)] = player #if piece can be dropped, board is updated
                 break
         return row #returns row if piece is dropped or -1 if column is full
+
+    def check_winner(self, player, row, column):
+        def check_row():
+            counter = 0
+            for col in self.board[int(row)]:
+                if col == player:
+                    counter += 1
+                    if counter == 4: return True
+                else:
+                    counter = 0
+            return False
+
+        def check_column():
+            counter = 0
+            for iterate_row in range(6):
+                if self.board[iterate_row][int(column)] == player:
+                    counter += 1
+                    if counter == 4: return True
+                else:
+                    counter = 0
+            return False
+
+        def check_northeast():
+            sum = int(row) + int(column)
+            if (sum > 2 or sum < 9):
+                counter = 0
+                if sum < 6:
+                    for i in range(sum + 1):
+                        if self.board[sum-i][i] == player:
+                            counter += 1
+                            if counter == 4: return True
+                        else:
+                            counter = 0
+                else:
+                    for i in range(12-sum):
+                        if self.board[5-i][sum-5+i] == player:
+                            counter += 1
+                            if counter == 4: return True
+                        else:
+                            counter = 0
+            return False
+
+            def check_southeast():
+                diff = int(row)-int(column)
+                abs_diff = abs(diff)
+                if (abs_diff < 3) or (abs_diff == 3 and int(column) >= 3):
+                    counter = 0
+                    if diff >= 0:
+                        for i in range(6-abs_diff):
+                            if self.board[diff + i][i] == player:
+                                counter += 1
+                                if counter == 4: return True
+                            else:
+                                counter = 0
+                    else:
+                        for i in range(7-abs_diff):
+                            if self.board[i][abs_diff + i] == player:
+                                counter += 1
+                                if counter == 4: return True
+                            else:
+                                counter = 0
+                return False
+            return (check_row() or check_column() or check_northeast() or check_southeast())
