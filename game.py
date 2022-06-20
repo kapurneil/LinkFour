@@ -25,6 +25,7 @@ class Game:
 
     def check_winner(self, player, row, column):
         def check_row():
+            #checks row piece is dropped to see if connect four has been achieved
             counter = 0
             for col in self.board[int(row)]:
                 if col == player:
@@ -35,6 +36,7 @@ class Game:
             return False
 
         def check_column():
+            #checks column piece is dropped to see if connect four has been achieved
             counter = 0
             for iterate_row in range(6):
                 if self.board[iterate_row][int(column)] == player:
@@ -45,8 +47,9 @@ class Game:
             return False
 
         def check_northeast():
-            sum = int(row) + int(column)
+            sum = int(row) + int(column) #uses sum of row and column to determine in which northeast diagonals connect 4 is possible
             if (sum > 2 or sum < 9):
+                #if piece is on northeast diagonal that can have a connect 4, code checks if it has occurred
                 counter = 0
                 if sum < 6:
                     for i in range(sum + 1):
@@ -84,4 +87,5 @@ class Game:
                             else:
                                 counter = 0
                 return False
-            return (check_row() or check_column() or check_northeast() or check_southeast())
+                
+            return check_row() or check_column() or check_northeast() or check_southeast()
