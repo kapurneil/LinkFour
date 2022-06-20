@@ -87,5 +87,39 @@ class Game:
                             else:
                                 counter = 0
                 return False
-                
+
             return check_row() or check_column() or check_northeast() or check_southeast()
+
+def main():
+    #creates game and necessary variables
+    game = Game()
+    turn_counter = 0
+    winner = 0
+
+    #game is played
+    while True:
+        for player in range(1, 3):
+            if turn(game, player):
+                winner = player
+                turn_counter += 1
+                break
+        if winner != 0 or turn_counter >= 42: break
+
+    #print out winner
+    if winner == 0:
+        print("It's a tie!")
+    else:
+        print(f"Player {winner} wins!")
+
+def turn(game, player):
+    while True:
+        get_column = input(f"Player {player}, enter column: ")
+        column = int(get_column) - 1
+        row = game.drop_piece(player, column)
+        if row != -1: break #ends loop if piece can be dropped in specified column
+        print("ERROR: Column is already full!")
+    print(game)
+    return game.check_winner(player, row, column)
+
+if __name__ == "__main__":
+    main()
