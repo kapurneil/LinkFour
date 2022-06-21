@@ -30,7 +30,7 @@ class Game:
             for col in self.board[int(row)]:
                 if col == player:
                     counter += 1
-                    if counter == 4: return True
+                    if counter >= 4: return True
                 else:
                     counter = 0
             return False
@@ -41,7 +41,7 @@ class Game:
             for iterate_row in range(6):
                 if self.board[iterate_row][int(column)] == player:
                     counter += 1
-                    if counter == 4: return True
+                    if counter >= 4: return True
                 else:
                     counter = 0
             return False
@@ -55,40 +55,40 @@ class Game:
                     for i in range(sum + 1):
                         if self.board[sum-i][i] == player:
                             counter += 1
-                            if counter == 4: return True
+                            if counter >= 4: return True
                         else:
                             counter = 0
                 else:
                     for i in range(12-sum):
                         if self.board[5-i][sum-5+i] == player:
                             counter += 1
-                            if counter == 4: return True
+                            if counter >= 4: return True
                         else:
                             counter = 0
             return False
 
-            def check_southeast():
-                diff = int(row)-int(column)
-                abs_diff = abs(diff)
-                if (abs_diff < 3) or (abs_diff == 3 and int(column) >= 3):
-                    counter = 0
-                    if diff >= 0:
-                        for i in range(6-abs_diff):
-                            if self.board[diff + i][i] == player:
-                                counter += 1
-                                if counter == 4: return True
-                            else:
-                                counter = 0
-                    else:
-                        for i in range(7-abs_diff):
-                            if self.board[i][abs_diff + i] == player:
-                                counter += 1
-                                if counter == 4: return True
-                            else:
-                                counter = 0
-                return False
+        def check_southeast():
+            diff = int(row)-int(column)
+            abs_diff = abs(diff)
+            if (abs_diff < 3) or (abs_diff == 3 and int(column) >= 3):
+                counter = 0
+                if diff >= 0:
+                    for i in range(6-abs_diff):
+                        if self.board[diff + i][i] == player:
+                            counter += 1
+                            if counter >= 4: return True
+                        else:
+                            counter = 0
+                else:
+                    for i in range(7-abs_diff):
+                        if self.board[i][abs_diff + i] == player:
+                            counter += 1
+                            if counter >= 4: return True
+                        else:
+                            counter = 0
+            return False
 
-            return check_row() or check_column() or check_northeast() or check_southeast()
+        return (check_row() or check_column() or check_northeast() or check_southeast())
 
 def main():
     #creates game and necessary variables
@@ -101,8 +101,8 @@ def main():
         for player in range(1, 3):
             if turn(game, player):
                 winner = player
-                turn_counter += 1
                 break
+            turn_counter += 1
         if winner != 0 or turn_counter >= 42: break
 
     #print out winner
@@ -113,13 +113,24 @@ def main():
 
 def turn(game, player):
     while True:
-        get_column = input(f"Player {player}, enter column: ")
-        column = int(get_column) - 1
+        column = ask_column(player) - 1
         row = game.drop_piece(player, column)
-        if row != -1: break #ends loop if piece can be dropped in specified column
+        if row != -1: break #ends loop if piece can be dropped in specified column/turn is over
         print("ERROR: Column is already full!")
     print(game)
     return game.check_winner(player, row, column)
+
+def ask_column(player):
+    while True:
+        get_column = input(f"Player {player}, enter column: ")
+        try:
+            column = int(get_column)
+            if column > 0 and column < 8:
+                return column
+            else:
+                print("ERROR: Column number must be 1-7.")
+        except ValueError:
+            print("ERROR: Column number must be an INTEGER 1-7")
 
 if __name__ == "__main__":
     main()
