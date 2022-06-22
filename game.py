@@ -13,19 +13,35 @@ class Game:
         return str_board
 
     def drop_piece(self, player: int, column: int, row: int):
-        #method updates board when piece is dropped
+        """method updates board when piece is dropped
+        Arguments:
+            player (int): the player number (1 or 2)
+            column (int): the column where the piece is being dropped
+            row (int): the row where the piece is being dropped
+        """
         self.board[int(row)][int(column)] = player
 
     def get_next_available_row(self, column: int) -> int:
-        #method returns first available row (from bottom to top) in a certain column
+        """gets available row (from bottom to top) in a certain column
+        Arguments:
+            column (int): the column from which the first available row is being obtained
+        Returns:
+            int: the first available row in column or -1 if column is full
+        """
         for check_row in range(5, -1, -1): #goes from bottom row to top
             if self.board[check_row][column] == 0:
                 return check_row #returns first available row in column if column is not full
         return -1 #returns -1 if column is full
 
     def has_winner(self, player: int, row: int, column: int) -> bool:
-        #method checks if a connect 4 has been achieved and returns a boolean
-        #row and column represent the location where the piece was dropped
+        """checks if the most recent move resulted in a win
+        Arguments:
+            player (int): the player that just dropped a piece (1 or 2)
+            row (int): the row where the most recent piece was dropped
+            column (int): the column where the most recent piece was dropped
+        Returns:
+            bool: if the most recent move resulted in a win or not
+        """
         def check_row() -> bool:
             counter = 1
             #check to left
@@ -108,14 +124,20 @@ def main():
     #game is played
     while winner == 0 and turn_counter < 42:
         for player in range(1, 3):
+            #ask user which column they want to drop piece in
+            #asks again if column is already full
             row = -1
             while row == -1:
                 get_column = ask_column(player)
                 column = int(get_column)
                 row = game.get_next_available_row(column)
                 if row == -1: print("ERROR: Column is full.")
+
+            #drop piece in column and print board
             game.drop_piece(player, column, row)
             print(game)
+
+            #check for winner
             if game.has_winner(player, row, column):
                 winner = player
                 break
@@ -129,7 +151,12 @@ def main():
 
 @staticmethod
 def ask_column(player: int) -> int:
-    #function asks user which column they want to drop connect 4 piece in and returns the column as an integer
+    """asks user which column they wish to drop a piece until they enter a valid integer between 1 and 7
+    Arguments:
+        player (int): player number (1 or 2)
+    Returns:
+        int: column they wish to drop a piece in
+    """
     while True:
         get_column = input(f"Player {player}, enter column: ")
         try:
