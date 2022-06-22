@@ -1,6 +1,6 @@
 class Game:
     def __init__(self):
-        self.board = [[0 for i in range(7)] for i in range(6)] #creates board with 6 rows, 7 columns
+        self.board = [[0 for element in range(7)] for row in range(6)] #creates board with 6 rows, 7 columns
 
     def __repr__(self):
         str_board = ""
@@ -12,84 +12,93 @@ class Game:
                 if element == 2: str_board += "Y " #2 represents yellow
         return str_board
 
-    def drop_piece(self, player, column):
-        #checks to see if a piece can be dropped in a column.
-        #if column is full, -1 is returned, otherwise the row is returned and the board is updated
-        row = -1
-        for check_row in range(5, -1, -1):
-            if self.board[check_row][int(column)] == 0:
-                row = check_row
-                self.board[row][int(column)] = player #if piece can be dropped, board is updated
-                break
-        return row #returns row if piece is dropped or -1 if column is full
+    def drop_piece(self, player: int, column: int, row: int):
+        #method updates board when piece is dropped
+        self.board[int(row)][int(column)] = player
 
-    def check_winner(self, player, row, column):
-        def check_row():
-            #checks row piece is dropped to see if connect four has been achieved
-            counter = 0
-            for col in self.board[int(row)]:
-                if col == player:
-                    counter += 1
-                    if counter >= 4: return True
-                else:
-                    counter = 0
-            return False
+    def get_next_available_row(self, column: int) -> int:
+        #method returns first available row (from bottom to top) in a certain column
+        for check_row in range(5, -1, -1): #goes from bottom row to top
+            if self.board[check_row][column] == 0:
+                return check_row #returns first available row in column if column is not full
+        return -1 #returns -1 if column is full
 
-        def check_column():
-            #checks column piece is dropped to see if connect four has been achieved
-            counter = 0
-            for iterate_row in range(6):
-                if self.board[iterate_row][int(column)] == player:
-                    counter += 1
-                    if counter >= 4: return True
-                else:
-                    counter = 0
-            return False
+    def has_winner(self, player: int, row: int, column: int) -> bool:
+        #method checks if a connect 4 has been achieved and returns a boolean
+        #row and column represent the location where the piece was dropped
+        def check_row() -> bool:
+            counter = 1
+            #check to left
+            for check_column in range(column-1, -1, -1):
+                if self.board[row][check_column] != player: break
+                counter +=1
 
-        def check_northeast():
-            sum = int(row) + int(column) #uses sum of row and column to determine in which northeast diagonals connect 4 is possible
-            if (sum > 2 or sum < 9):
-                #if piece is on northeast diagonal that can have a connect 4, code checks if it has occurred
-                counter = 0
-                if sum < 6:
-                    for i in range(sum + 1):
-                        if self.board[sum-i][i] == player:
-                            counter += 1
-                            if counter >= 4: return True
-                        else:
-                            counter = 0
-                else:
-                    for i in range(12-sum):
-                        if self.board[5-i][sum-5+i] == player:
-                            counter += 1
-                            if counter >= 4: return True
-                        else:
-                            counter = 0
-            return False
+            #check to right
+            for check_column in range(column+1, 7, 1):
+                if self.board[row][check_column] != player: break
+                counter += 1
 
-        def check_southeast():
-            diff = int(row)-int(column)
-            abs_diff = abs(diff)
-            if (abs_diff < 3) or (abs_diff == 3 and int(column) >= 3):
-                counter = 0
-                if diff >= 0:
-                    for i in range(6-abs_diff):
-                        if self.board[diff + i][i] == player:
-                            counter += 1
-                            if counter >= 4: return True
-                        else:
-                            counter = 0
-                else:
-                    for i in range(7-abs_diff):
-                        if self.board[i][abs_diff + i] == player:
-                            counter += 1
-                            if counter >= 4: return True
-                        else:
-                            counter = 0
-            return False
+            return counter >= 4
 
-        return (check_row() or check_column() or check_northeast() or check_southeast())
+        def check_column() -> bool:
+            counter = 1
+            #check upwards
+            for check_row in range(row-1, -1, -1):
+                if self.board[check_row][column] != player: break
+                counter += 1
 
+            #check downwards
+            for check_row in range(row+1, 6, 1):
+                if self.board[check_row][column] != player: break
+                counter += 1
+
+            return counter >= 4
+
+        def check_northeast_diagonal() -> bool:
+            #check if piece is on a northeast diagonal with at least 4 spaces using sum
+            sum = row + column
+            if sum < 3 or sum > 8: return False #NE diagonal does not have 4 spaces
+
+            counter = 1
+            #check upwards
+            check_row = row - 1; check_column = column + 1
+            while check_row > -1 and check_column < 7:
+                if self.board[check_row][check_column] != player: break
+                counter += 1; check_row -= 1; check_column += 1
+
+            #check downwards
+            check_row = row + 1; check_column = column - 1
+            while check_row < 6 and check_column > -1:
+                if self.board[check_row][check_column] != player: break
+                counter += 1; check_row += 1; check_column -= 1
+
+            return counter >= 4
+
+        def check_southeast_diagonal() -> bool:
+            #check if piece is on a southeast diagonal with at least 4 spaces using difference
+            diff = row - column
+            if diff < -3 or diff > 2: return False #SE diagonal does not have 4 spaces
+
+            counter = 1
+            #check upwards
+            check_row = row - 1; check_column = column - 1
+            while check_row > -1 and check_column > - 1:
+                if self.board[check_row][check_column] != player: break
+                counter += 1; check_row -= 1; check_column -= 1
+
+            #check downwards
+            check_row = row + 1; check_column = column + 1
+            while check_row < 6 and check_column < 7:
+                if self.board[check_row][check_column] != player: break
+                counter += 1; check_row += 1; check_column += 1
+
+            return counter >= 4
+
+            #check each possible scenario and return true if four in a row has occurred
+        return check_row() or check_column() or check_northeast_diagonal() or check_southeast_diagonal()
+#end of game class
+
+@staticmethod
 def main():
     #creates game and necessary variables
     game = Game()
@@ -97,36 +106,36 @@ def main():
     winner = 0
 
     #game is played
-    while True:
+    while winner == 0 and turn_counter < 42:
         for player in range(1, 3):
-            if turn(game, player):
+            row = -1
+            while row == -1:
+                get_column = ask_column(player)
+                column = int(get_column)
+                row = game.get_next_available_row(column)
+                if row == -1: print("ERROR: Column is full.")
+            game.drop_piece(player, column, row)
+            print(game)
+            if game.has_winner(player, row, column):
                 winner = player
                 break
             turn_counter += 1
-        if winner != 0 or turn_counter >= 42: break
 
-    #print out winner
+    #prints out winner/results
     if winner == 0:
         print("It's a tie!")
     else:
         print(f"Player {winner} wins!")
 
-def turn(game, player):
-    while True:
-        column = ask_column(player) - 1
-        row = game.drop_piece(player, column)
-        if row != -1: break #ends loop if piece can be dropped in specified column/turn is over
-        print("ERROR: Column is already full!")
-    print(game)
-    return game.check_winner(player, row, column)
-
-def ask_column(player):
+@staticmethod
+def ask_column(player: int) -> int:
+    #function asks user which column they want to drop connect 4 piece in and returns the column as an integer
     while True:
         get_column = input(f"Player {player}, enter column: ")
         try:
             column = int(get_column)
             if column > 0 and column < 8:
-                return column
+                return column - 1
             else:
                 print("ERROR: Column number must be 1-7.")
         except ValueError:
